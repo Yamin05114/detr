@@ -129,6 +129,7 @@ class TransformerEncoderLayer(nn.Module):
     def __init__(self, d_model, nhead, dim_feedforward=2048, dropout=0.1,
                  activation="relu", normalize_before=False):
         super().__init__()
+        # multi-head attention in in pytorch now
         self.self_attn = nn.MultiheadAttention(d_model, nhead, dropout=dropout)
         # Implementation of Feedforward model
         self.linear1 = nn.Linear(d_model, dim_feedforward)
@@ -151,11 +152,16 @@ class TransformerEncoderLayer(nn.Module):
                      src_mask: Optional[Tensor] = None,
                      src_key_padding_mask: Optional[Tensor] = None,
                      pos: Optional[Tensor] = None):
+        # query and keys are from src
         q = k = self.with_pos_embed(src, pos)
+        
+        # self attention + dropout + norm1
         src2 = self.self_attn(q, k, value=src, attn_mask=src_mask,
                               key_padding_mask=src_key_padding_mask)[0]
         src = src + self.dropout1(src2)
         src = self.norm1(src)
+        
+        # linear + dropout + norm2
         src2 = self.linear2(self.dropout(self.activation(self.linear1(src))))
         src = src + self.dropout2(src2)
         src = self.norm2(src)
