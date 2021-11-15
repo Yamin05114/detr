@@ -54,6 +54,7 @@ class PositionEmbeddingLearned(nn.Module):
     """
     def __init__(self, num_pos_feats=256):
         super().__init__()
+        # embedding module就是50个256列的向量。空间均匀分布。
         self.row_embed = nn.Embedding(50, num_pos_feats)
         self.col_embed = nn.Embedding(50, num_pos_feats)
         self.reset_parameters()
@@ -64,15 +65,17 @@ class PositionEmbeddingLearned(nn.Module):
 
     def forward(self, tensor_list: NestedTensor):
         x = tensor_list.tensors
+        # x shape: [B, C, H, W]
         h, w = x.shape[-2:]
+        # i: 0 1 2...w   j: 0 1 2...h
         i = torch.arange(w, device=x.device)
         j = torch.arange(h, device=x.device)
         x_emb = self.col_embed(i)
         y_emb = self.row_embed(j)
-        pos = torch.cat([
-            x_emb.unsqueeze(0).repeat(h, 1, 1),
-            y_emb.unsqueeze(1).repeat(1, w, 1),
-        ], dim=-1).permute(2, 0, 1).unsqueeze(0).repeat(x.shape[0], 1, 1, 1)
+        pos = torch.cat([  
+            x_emb.unsqueeze(0).repeat(h, 1, 1),     # (w, c) -> (1, w, c) -> (h, w, c)
+            y_emb.unsqueeze(1).repeat(1, w, 1),     # (h, c) -> (h, 1, c) -> (h, w, c)
+        ], dim=-1).permute(2, 0, 1).unsqueeze(0).repeat(x.shape[0], 1, 1, 1)  # (c, h, w) -> (1, c, h, w) -> (b, c, h, w)
         return pos
 
 
