@@ -156,6 +156,7 @@ class TransformerEncoderLayer(nn.Module):
         q = k = self.with_pos_embed(src, pos)  # 匹配需要做标，feature不需要坐标
         
         # 第一部分：self attention + dropout + norm1
+        # mask过滤qk对
         src2 = self.self_attn(q, k, value=src, attn_mask=src_mask,
                               key_padding_mask=src_key_padding_mask)[0]
         src = src + self.dropout1(src2)  # resnet like layer skip
