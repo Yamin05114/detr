@@ -152,16 +152,16 @@ class TransformerEncoderLayer(nn.Module):
                      src_mask: Optional[Tensor] = None,
                      src_key_padding_mask: Optional[Tensor] = None,
                      pos: Optional[Tensor] = None):
-        # query and keys are from src
-        q = k = self.with_pos_embed(src, pos)
+        # query，keys都是原图
+        q = k = self.with_pos_embed(src, pos)  # 匹配需要做标，feature不需要坐标
         
-        # self attention + dropout + norm1
+        # 第一部分：self attention + dropout + norm1
         src2 = self.self_attn(q, k, value=src, attn_mask=src_mask,
                               key_padding_mask=src_key_padding_mask)[0]
-        src = src + self.dropout1(src2)
+        src = src + self.dropout1(src2)  # resnet like layer skip
         src = self.norm1(src)
         
-        # linear + dropout + norm2
+        # 第二部分：FFN linear + dropout + norm2
         src2 = self.linear2(self.dropout(self.activation(self.linear1(src))))
         src = src + self.dropout2(src2)
         src = self.norm2(src)
@@ -171,14 +171,14 @@ class TransformerEncoderLayer(nn.Module):
                     src_mask: Optional[Tensor] = None,
                     src_key_padding_mask: Optional[Tensor] = None,
                     pos: Optional[Tensor] = None):
-        # norm + self attention + dropout
+        # 第一部分：norm + self attention + dropout
         src2 = self.norm1(src)
         q = k = self.with_pos_embed(src2, pos)
         src2 = self.self_attn(q, k, value=src2, attn_mask=src_mask,
                               key_padding_mask=src_key_padding_mask)[0]
         src = src + self.dropout1(src2)
         
-        # norm + linear + dropout
+        # 第二部分：norm + FFN(Linear) + dropout
         src2 = self.norm2(src)
         src2 = self.linear2(self.dropout(self.activation(self.linear1(src2))))
         src = src + self.dropout2(src2)
