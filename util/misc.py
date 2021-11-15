@@ -281,6 +281,9 @@ def _max_by_axis(the_list):
 
 
 class NestedTensor(object):
+    """
+    Class to put t tensors and mask together
+    """
     def __init__(self, tensors, mask: Optional[Tensor]):
         self.tensors = tensors
         self.mask = mask
