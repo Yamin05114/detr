@@ -288,7 +288,7 @@ class PostProcess(nn.Module):
 
 class MLP(nn.Module):
     """ Very simple multi-layer perceptron (also called FFN)"""
-
+    # 所以FFN和MLP是完全一样的定义
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers):
         super().__init__()
         self.num_layers = num_layers
