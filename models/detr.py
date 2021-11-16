@@ -36,7 +36,7 @@ class DETR(nn.Module):
         hidden_dim = transformer.d_model
         self.class_embed = nn.Linear(hidden_dim, num_classes + 1)  # class直接liear出
         self.bbox_embed = MLP(hidden_dim, hidden_dim, 4, 3)  # bbox需要MLP？
-        self.query_embed = nn.Embedding(num_queries, hidden_dim)  # pytorch生成的object query
+        self.query_embed = nn.Embedding(num_queries, hidden_dim)  # object query，按照个数生成，可学习
         self.input_proj = nn.Conv2d(backbone.num_channels, hidden_dim, kernel_size=1)  # backbone channel 到 transformer channel
         self.backbone = backbone
         self.aux_loss = aux_loss
@@ -63,7 +63,7 @@ class DETR(nn.Module):
         src, mask = features[-1].decompose()
         assert mask is not None
         
-        # encoder decoder结构
+        # encoder decoder结构，需要input feature, pos encoding(sin不可学习), query encoding(nn.Embedding, 可学习)
         hs = self.transformer(self.input_proj(src), mask, self.query_embed.weight, pos[-1])[0]
 
         outputs_class = self.class_embed(hs)
