@@ -45,6 +45,15 @@ class Transformer(nn.Module):
                 nn.init.xavier_uniform_(p)
 
     def forward(self, src, mask, query_embed, pos_embed):
+    """
+    Args:
+         src: 
+         mask:
+         query_embed: nn.Embedding，可学习！！
+         pos_embed: sin encoding，不可学习！！
+    return:
+         decoder encoder output
+    """
         # flatten NxCxHxW to HWxNxC
         bs, c, h, w = src.shape
         src = src.flatten(2).permute(2, 0, 1)
